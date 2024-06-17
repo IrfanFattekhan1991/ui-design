@@ -1,49 +1,77 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState([]);
+  const [formData, setFormData] = useState({
+    userName: "",
+    password: "",
+  });
 
-  const validate = () => {
-    if (!userName || !password) {
-      setError("User Name and Password required!");
-      return;
+  const [errors, setErrors] = useState({});
+
+  const navigate = useNavigate();
+
+  const validateFormData = () => {
+    let newErrors = {};
+
+    //Validation userName
+    if (!formData.userName) {
+      newErrors.userName = "User name is required!";
+    } else if (formData.userName.length < 3) {
+      newErrors.userName = "User name must be 3 or more characters long!";
     }
-    if (userName.length < 3 || password.length < 6) {
-      setError(
-        "User name must be 3 characters long & password must be 6 characters long!"
-      );
-      return;
+
+    //Validation Password
+    if (!formData.password) {
+      newErrors.password = "Password is required!";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password length must be 6 or more characters long";
+    }
+
+    setErrors(newErrors);
+    //console.log(Object.keys(newErrors).length === 0);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const onSubmitHandler = (e) => {
+    e.preventDefault();
+
+    let isValid = validateFormData();
+
+    if (isValid) {
+      navigate("/home");
+      console.log("Form submitted successfully");
+    } else {
+      console.log("Form validation failed!");
     }
   };
 
-  const onSubmitHandler = (event) => {
-    event.preventDefault();
-    console.log(userName, password);
-    validate();
-    setUserName("");
-    setPassword("");
+  const onChangeHandler = (e) => {
+    const { name, value } = e.target;
+    console.log(e);
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
-  if (!error) {
-    window.location = "/Home";
-  }
   return (
     <form className="form" onSubmit={onSubmitHandler}>
-      <h1>Login</h1>
+      <label>Login</label>
       <input
         type="text"
-        value={userName}
-        onChange={(e) => setUserName(e.target.value)}
+        name="userName"
+        value={formData.userName}
+        onChange={onChangeHandler}
       />
-      <label>{error}</label>
+      {errors.userName && <p>{errors.userName}</p>}
       <input
         type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        name="password"
+        value={formData.password}
+        onChange={onChangeHandler}
       />
-      <label>{error}</label>
+      {errors.password && <p>{errors.password}</p>}
       <button className="btn">Login</button>
     </form>
   );
